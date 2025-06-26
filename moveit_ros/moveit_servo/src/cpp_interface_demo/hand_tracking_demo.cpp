@@ -11,6 +11,7 @@
 
 #include <std_msgs/msg/int8.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <sensor_msgs/msg/joint_state.hpp> // sensor_msgs/msg/JointState
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 #include <moveit_servo/servo.h>
@@ -83,6 +84,38 @@ private:
   mutable std::mutex mutex_;
 };
 
+// Subscribe to topic /joint_states for values of all joints
+class JointStatesListener
+{
+public:
+  JointStatesListener(const rclcpp::Node::SharedPtr& node, const std::string& topic)
+  {
+    sub_ = node->create_subscription<sensor_msgs::msg::JointState>( // sensor_msgs/msg/JointState
+      topic, rclcpp::SystemDefaultsQoS(),
+      [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg)
+      {
+        std::lock_guard<std::mutex> lock(mutex_);
+        latest_joint_states_ = *msg;
+        received_ = true;
+      }
+    );
+  }
+
+  std::optional<sensor_msgs::msg::JointState> getLatestJointStates()
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return latest_joint_states_;
+  }
+
+  bool hasReceived() const { return received_; }
+
+private:
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr sub_;
+  std::optional<sensor_msgs::msg::JointState> latest_joint_states_;
+  std::atomic<bool> received_{false};
+  mutable std::mutex mutex_;
+};
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
@@ -136,6 +169,9 @@ int main(int argc, char** argv)
 
   // Subscribe to hand pose perception
   TargetPoseListener perception_listener(node, "/pose_perception/right_end_effector_coords");
+
+  // Subscribe to /joint_states
+  JointStatesListener joint_states_listener(node, "/joint_states");
 
   // Wait for first content on the perception topic
   RCLCPP_INFO(LOGGER, "Waiting for a message on /pose_perception/right_end_effector_coords...");
@@ -210,6 +246,23 @@ int main(int argc, char** argv)
       target_pose.pose.orientation.z, 
       target_pose.pose.orientation.w
     );
+
+    // show current joint states
+    auto latest_joint_states = joint_states_listener.getLatestJointStates();
+    if (latest_joint_states) {
+      RCLCPP_INFO(LOGGER, "Current joint states: "
+        "joint1: %.3f, joint2: %.3f, joint3: %.3f, joint4: %.3f, joint5: %.3f, joint6: %.3f, joint7: %.3f,",
+        latest_joint_states->position[1], 
+        latest_joint_states->position[2],
+        latest_joint_states->position[4],
+        latest_joint_states->position[5],
+        latest_joint_states->position[6],
+        latest_joint_states->position[7],
+        latest_joint_states->position[8]
+      );
+    }
+
+
 
     // Publish for visualization/feedback, optional
     target_pose_pub->publish(target_pose);

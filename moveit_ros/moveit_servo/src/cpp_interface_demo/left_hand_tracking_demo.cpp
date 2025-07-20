@@ -267,20 +267,22 @@ int main(int argc, char** argv)
     //   target_pose.pose.orientation.w
     // );
 
-    // // show current joint states
-    // auto latest_joint_states = joint_states_listener.getLatestJointStates();
-    // if (latest_joint_states) {
-    //   RCLCPP_INFO(LOGGER, "Current joint states: "
-    //     "joint1: %.3f, joint2: %.3f, joint3: %.3f, joint4: %.3f, joint5: %.3f, joint6: %.3f, joint7: %.3f,",
-    //     latest_joint_states->position[1], 
-    //     latest_joint_states->position[2],
-    //     latest_joint_states->position[4],
-    //     latest_joint_states->position[5],
-    //     latest_joint_states->position[6],
-    //     latest_joint_states->position[7],
-    //     latest_joint_states->position[8]
-    //   );
-    // }
+    // show current joint states
+    auto latest_joint_states = joint_states_listener.getLatestJointStates();
+    if (latest_joint_states) {
+      RCLCPP_INFO(LOGGER, "Current joint states for left arm: "
+        "left_panda_joint1: %.3f, left_panda_joint2: %.3f, "
+        "left_panda_joint3: %.3f, left_panda_joint4: %.3f, "
+        "left_panda_joint5: %.3f, left_panda_joint6: %.3f, left_panda_joint7: %.3f,",
+        latest_joint_states->position[12], 
+        latest_joint_states->position[6],
+        latest_joint_states->position[11],
+        latest_joint_states->position[9],
+        latest_joint_states->position[7],
+        latest_joint_states->position[5],
+        latest_joint_states->position[4]
+      );
+    }
 
 
 

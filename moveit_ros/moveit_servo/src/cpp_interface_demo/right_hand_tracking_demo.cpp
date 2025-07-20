@@ -24,7 +24,7 @@
 #include <optional>
 #include <atomic>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.left_hand_tracking_demo");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.right_hand_tracking_demo");
 
 // Class for monitoring status of moveit_servo
 class StatusMonitor
@@ -119,7 +119,7 @@ private:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("left_hand_tracking_demo");
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("right_hand_tracking_demo");
 
   auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node);
 
@@ -168,13 +168,13 @@ int main(int argc, char** argv)
   double rot_tol = 0.01;
 
   // Subscribe to hand pose perception
-  TargetPoseListener perception_listener(node, "/pose_perception/left_end_effector_coords");
+  TargetPoseListener perception_listener(node, "/pose_perception/right_end_effector_coords");
 
   // Subscribe to /joint_states
   JointStatesListener joint_states_listener(node, "/joint_states");
 
   // Wait for first content on the perception topic
-  RCLCPP_INFO(LOGGER, "Waiting for a message on /pose_perception/left_end_effector_coords...");
+  RCLCPP_INFO(LOGGER, "Waiting for a message on /pose_perception/right_end_effector_coords...");
   
   // Create executor in a separate thread
   rclcpp::executors::SingleThreadedExecutor executor;
@@ -212,7 +212,7 @@ int main(int argc, char** argv)
   target_init_pose.header.frame_id = received_init_pose->header.frame_id;
   target_init_pose.header.stamp = node->now();
   target_init_pose.pose.position.x = received_init_pose->pose.position.x;
-  target_init_pose.pose.position.y = 0.0; //-0.5;
+  target_init_pose.pose.position.y = 0.0;
   target_init_pose.pose.position.z = received_init_pose->pose.position.z;
   target_init_pose.pose.orientation = received_init_pose->pose.orientation;
   RCLCPP_INFO(LOGGER, "Target initial target pose: "
@@ -248,11 +248,11 @@ int main(int argc, char** argv)
     auto latest_pose = perception_listener.getLatestPose();
     geometry_msgs::msg::PoseStamped target_pose;
 
-    // deal-arm left arm, i.e. rotated and translated
+    // deal-arm right arm, i.e. rotated and translated
     target_pose.header.frame_id = latest_pose->header.frame_id;
     target_pose.header.stamp = node->now();
     target_pose.pose.position.x = latest_pose->pose.position.x;
-    target_pose.pose.position.y = 0.0; //-0.5;
+    target_pose.pose.position.y = 0.0;
     target_pose.pose.position.z = latest_pose->pose.position.z;
     target_pose.pose.orientation = latest_pose->pose.orientation;
 

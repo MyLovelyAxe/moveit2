@@ -24,6 +24,7 @@ set(SERVO_NODE_MAIN_NAME servo_node_main)
 set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
 set(HAND_TRACKING_DEMO_NAME servo_hand_tracking_demo)
 set(DUAL_LEFT_HAND_TRACKING_DEMO_NAME servo_dual_left_hand_tracking_demo)
+set(DUAL_RIGHT_HAND_TRACKING_DEMO_NAME servo_dual_right_hand_tracking_demo)
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 
 #################################################################
@@ -128,6 +129,10 @@ add_executable(${DUAL_LEFT_HAND_TRACKING_DEMO_NAME} src/cpp_interface_demo/left_
 target_link_libraries(${DUAL_LEFT_HAND_TRACKING_DEMO_NAME} ${POSE_TRACKING})
 ament_target_dependencies(${DUAL_LEFT_HAND_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
+# Dual right hand pose tracking demo
+add_executable(${DUAL_RIGHT_HAND_TRACKING_DEMO_NAME} src/cpp_interface_demo/right_hand_tracking_demo.cpp)
+target_link_libraries(${DUAL_RIGHT_HAND_TRACKING_DEMO_NAME} ${POSE_TRACKING})
+ament_target_dependencies(${DUAL_RIGHT_HAND_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add executable to publish fake servo commands for testing/demo purposes
 add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
@@ -164,6 +169,7 @@ install(
     ${POSE_TRACKING_DEMO_NAME}
     ${HAND_TRACKING_DEMO_NAME}
     ${DUAL_LEFT_HAND_TRACKING_DEMO_NAME}
+    ${DUAL_RIGHT_HAND_TRACKING_DEMO_NAME}
     ${FAKE_SERVO_CMDS_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

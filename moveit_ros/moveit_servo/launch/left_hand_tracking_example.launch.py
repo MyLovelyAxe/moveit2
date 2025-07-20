@@ -9,46 +9,19 @@ from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
-    #####################################################
-    # original
-    # moveit_config = (
-    #     MoveItConfigsBuilder("moveit_resources_panda") # automatically looking for a pacakage named as moveit_resources_panda_moveit_config
-    #     .robot_description(
-    #         file_path="config/panda.urdf.xacro",
-    #         # mappings={
-    #         #     "ros2_control_hardware_type": LaunchConfiguration(
-    #         #         "ros2_control_hardware_type"
-    #         #     )
-    #         # },
-    #     )
-    #     .robot_description_semantic(file_path="config/panda.srdf")
-    #     .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
-    #     .planning_scene_monitor(
-    #         publish_robot_description=True, publish_robot_description_semantic=True
-    #     )
-    #     .planning_pipelines(
-    #         pipelines=["ompl", "chomp", "pilz_industrial_motion_planner"]
-    #     )
-    #     .to_moveit_configs()
-    # )
+
     # only left hand for dual arm
     moveit_config = (
         MoveItConfigsBuilder("dual_arm_panda") # automatically looking for a pacakage named as <whatever_given>_moveit_config
         .robot_description(file_path="config/panda.urdf.xacro")
         .robot_description_semantic(file_path="config/panda.srdf")
-        .trajectory_execution(file_path="config/moveit_controllers.yaml")
-        # ############### test ##############
+        .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
         .planning_scene_monitor(
             publish_robot_description=True, publish_robot_description_semantic=True
         )
-        # ############### test ##############
         .planning_pipelines(pipelines=["ompl"])
         .to_moveit_configs()
     )
-
-
-    #####################################################
-
 
     # Get parameters for the Pose Tracking node
     servo_params = {
@@ -79,15 +52,6 @@ def generate_launch_description():
         executable="robot_state_publisher",
         output="screen",
         parameters=[moveit_config.robot_description],
-    )
-
-    # A node to publish world -> panda_link0 transform
-    static_tf = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        name="static_transform_publisher",
-        output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
     )
 
     dual_left_hand_tracking_node = Node(
@@ -156,22 +120,21 @@ def generate_launch_description():
         name='webcam_img_provider',
     )
 
-    perception_node = Node(
+    perception_dual_arm_node = Node(
         package='pose_gesture_perception',
-        executable='pose_gesture_processer',
-        name='pose_gesture_processer',
+        executable='pose_gesture_processer_dual_arm',
+        name='pose_gesture_processer_dual_arm',
     )
 
-    # control_gripper_node = Node(
-    #     package='control_gripper',
-    #     executable='control_gripper',
-    #     name='control_gripper',
-    # )
+    control_left_gripper_node = Node(
+        package='control_gripper',
+        executable='control_left_gripper',
+        name='control_left_gripper',
+    )
 
     return LaunchDescription(
         [
             rviz_node,
-            static_tf,
             dual_left_hand_tracking_node,
             ros2_control_node,
             joint_state_broadcaster_spawner,
@@ -181,7 +144,7 @@ def generate_launch_description():
             right_hand_controller_spawner,
             robot_state_publisher,
             webcam_node,
-            perception_node,
-            # control_gripper_node,
+            perception_dual_arm_node,
+            control_left_gripper_node,
         ]
     )

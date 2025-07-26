@@ -89,13 +89,6 @@ def generate_launch_description():
         name='pose_gesture_processer_dual_arm',
     )
 
-    ### split joint states for left and right hands
-    joint_states_splitter_node = Node(
-        package='moveit_servo',
-        executable='joint_states_splitter',
-        name='joint_states_splitter'
-    )
-
 
     ######################
     ###### Left arm ######
@@ -204,7 +197,6 @@ def generate_launch_description():
             ros2_control_node,
             webcam_node,
             perception_dual_arm_node,
-            joint_states_splitter_node,
             ### left arm configuration
             # dual_left_hand_tracking_node,
             left_arm_controller_spawner,
